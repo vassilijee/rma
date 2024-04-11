@@ -2,7 +2,7 @@ package com.example.kolokvijum1.cats.repository
 
 import com.example.kolokvijum1.cats.api.CatsApi
 import com.example.kolokvijum1.cats.api.model.CatsApiModel
-import com.example.kolokvijum1.cats.model.CatData
+import com.example.kolokvijum1.cats.list.model.CatUiModel
 import com.example.kolokvijum1.networking.retrofit
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -14,77 +14,42 @@ import kotlinx.coroutines.flow.update
 import kotlin.time.Duration.Companion.seconds
 
 object CatRepository {
-
-    //    private var mutablePasswords = SampleData.toMutableList()
-    private val cats = MutableStateFlow(listOf<CatData>())
     private val catsApi: CatsApi = retrofit.create(CatsApi::class.java)
+    private val cats = MutableStateFlow(listOf<CatUiModel>())
 
+    fun allCats(): List<CatUiModel> = cats.value
 
-    fun allCats(): List<CatData> = cats.value
-
-    /**
-     * Simulates api network request which downloads sample data
-     * from network and updates passwords in this repository.
-     */
-//    suspend fun fetchCats() {
-//        delay(2.seconds)
-//        cats.update { SampleData.toMutableList() }
-//    }
     suspend fun fetchAllCats(): List<CatsApiModel> {
-        val cats = catsApi.getAllCats()
-
-        // We can here save this locally, or do any other calculations or whatever
-
-        return cats
-    }
-    /**
-     * Simulates api network request which updates single password.
-     * It does nothing. Just waits for 1 second.
-     */
-    suspend fun fetchCatsDetails(catId: String) {
-//        delay(1.seconds)
+        val fetchedCatsApi = catsApi.getAllCats()
+        val catUiModels =
+            fetchedCatsApi.map { it.asCatUiModel() } // Convert each CatsApiModel to CatUiModel
+        cats.value = catUiModels // Update the MutableStateFlow with the new list of CatUiModel
+        return fetchedCatsApi
     }
 
-    /**
-     * Returns StateFlow which holds all passwords.
-     */
-    fun observeCats(): Flow<List<CatData>> = cats.asStateFlow()
-
-    /**
-     * Returns regular flow with LoginData with given passwordId.
-     */
-    fun observeCatsDetails(catId: String): Flow<CatData?> {
-        return observeCats().map { cats -> cats.find { it.id == catId } }
-            .distinctUntilChanged()
+    suspend fun fetchCatsDetails(catId: String): CatsApiModel {
+        val catsApi = catsApi.getCat(catId);
+        return catsApi
     }
 
-    fun getCatById(id: String): CatData? {
-        return cats.value.find { it.id == id }
-    }
 
-    fun deleteCats(id: String) {
-        cats.update { list ->
-            val index = list.indexOfFirst { it.id == id }
-            if (index != -1) {
-                list.toMutableList().apply { removeAt(index) }
-            } else {
-                list
-            }
-        }
-    }
+    fun observeCats(): Flow<List<CatUiModel>> = cats.asStateFlow()
 
-    fun updateOrInsertCat(id: String, data: CatData) {
-        cats.update { list ->
-            val index = list.indexOfFirst { it.id == id }
-            if (index != -1) {
-                list.toMutableList().apply {
-                    this[index] = data
-                }
-            } else {
-                list.toMutableList().apply {
-                    add(data)
-                }
-            }
-        }
-    }
+
+//    fun observeCatsDetails(catId: String): Flow<CatData?> {
+//        return observeCats().map { cats -> cats.find { it.id == catId } }
+//            .distinctUntilChanged()
+//    }
+
+//    suspend fun getCatById(id: String): CatsApiModel? {
+//        return cats.value.find { it.id == id }
+//    }
+
+    private fun CatsApiModel.asCatUiModel() = CatUiModel(
+        id = this.id,
+        description = this.description,
+        alt_names = this.alt_names ?: "", // Providing a default value for nullable properties
+        name = this.name,
+        temperament = this.temperament
+    )
 }

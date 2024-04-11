@@ -1,8 +1,10 @@
 package com.example.kolokvijum1.cats.list
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.kolokvijum1.cats.api.model.CatsApiModel
+import com.example.kolokvijum1.cats.list.model.CatUiModel
 import com.example.kolokvijum1.cats.repository.CatRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -10,8 +12,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.IOException
-import java.nio.file.Files.copy
 
 class CatListViewModel(private val repository: CatRepository = CatRepository) : ViewModel() {
     private val _state = MutableStateFlow(CatListState())
@@ -19,7 +19,7 @@ class CatListViewModel(private val repository: CatRepository = CatRepository) : 
     private fun setState(reducer: CatListState.() -> CatListState) = _state.getAndUpdate(reducer)
 
     init {
-        //observeCats()
+        observeCats()
         fetchCats()
     }
 
@@ -28,15 +28,17 @@ class CatListViewModel(private val repository: CatRepository = CatRepository) : 
      * underlying data changes. We are using viewModelScope which
      * will cancel the subscription when view model dies.
      */
-//    private fun observeCats() {
-//        // We are launching a new coroutine
-//        viewModelScope.launch {
-//            // Which will observe all changes to our passwords
+    private fun observeCats() {
+        // We are launching a new coroutine
+        viewModelScope.launch {
+            // Which will observe all changes to our passwords
 //            repository.observeCats().collect {
 //                setState { copy(cats = it) }
 //            }
-//        }
-//    }
+//            ??
+            setState { copy(cats = repository.allCats()) }
+        }
+    }
 
     /**
      * Fetches passwords from simulated api endpoint and
@@ -51,7 +53,7 @@ class CatListViewModel(private val repository: CatRepository = CatRepository) : 
                 }
                 setState { copy(cats = cats) }
             } catch (error: Exception) {
-//                setState { copy(error = CatListState.ListError.ListUpdateFailed(cause = error)) }
+                Log.e("CatViewModel", "Error fetching cats", error)
             } finally {
                 setState { copy(loading = false) }
             }
@@ -61,7 +63,7 @@ class CatListViewModel(private val repository: CatRepository = CatRepository) : 
         id = this.id,
         name = this.name,
         description = this.description,
-        //alt_names = this.alt_names,
-//        temperament = this.temperament
+        alt_names = this.alt_names ?: "", // Providing a default value for nullable properties
+        temperament = this.temperament
     )
 }

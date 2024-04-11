@@ -6,8 +6,8 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.kolokvijum1.cats.details.catDetailScreen
-import com.example.kolokvijum1.cats.list.catsListScreen
+import com.example.kolokvijum1.cats.details.catDetail
+import com.example.kolokvijum1.cats.list.cats
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -20,20 +20,15 @@ fun AppNavigation() {
         startDestination = "cats",
     ) {
 
-        catsListScreen(
-            route = "cats",
-            navController = navController,
-        )
+        cats(route = "cats", onCatClick = {
+            navController.navigate(route = "cats/$it")
+        })
 
-        catDetailScreen(
-            route = "cats/{dataId}",
-            arguments = listOf(
-                navArgument(name = "dataId") {
-                    this.type = NavType.StringType
-                    this.nullable = true
-                }
-            ),
-            navController = navController,
-        )
+        catDetail(route = "cats/{dataId}", arguments = listOf(navArgument(name = "dataId") {
+            this.type = NavType.StringType
+            this.nullable = true
+        }), onClose = {
+            navController.navigateUp()
+        })
     }
 }

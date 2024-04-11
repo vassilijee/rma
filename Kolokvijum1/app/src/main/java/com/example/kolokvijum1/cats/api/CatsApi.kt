@@ -11,7 +11,7 @@ interface CatsApi {
 
     @GET("breeds/{id}")
     suspend fun getCat(
-        @Path("id") userId: Int,
+        @Path("id") userId: String,
     ): CatsApiModel
 
 //    @GET("cats/{id}/albums")

@@ -8,25 +8,20 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ListItem
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
@@ -38,7 +33,6 @@ import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -47,93 +41,35 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
-import com.example.kolokvijum1.cats.model.CatData
-import com.example.kolokvijum1.cats.repository.SampleData
-import com.example.kolokvijum1.core.theme.Kolokvijum1Theme
+import com.example.kolokvijum1.cats.list.model.CatUiModel
 
 private val topBarContainerColor = Color.LightGray
 
-@ExperimentalMaterial3Api
-fun NavGraphBuilder.catsListScreen(
+fun NavGraphBuilder.cats(
     route: String,
-    navController: NavController,
+    onCatClick: (String) -> Unit
 ) = composable(route = route) {
     val catListViewModel = viewModel<CatListViewModel>()
     val state by catListViewModel.state.collectAsState()
 
     CatListScreen(
         state = state,
-        onItemClick = {
-            navController.navigate(route = "cats/${it.id}")
-        },
+        onCatClick = onCatClick,
+
+//        onItemClick = {
+//            navController.navigate(route = "cats/${it.id}")
+//        },
     )
 }
-
-
-//@OptIn(ExperimentalMaterial3Api::class)
-//@Composable
-//fun CatListScreen(
-//    state: CatListState,
-//    onItemClick: (CatData) -> Unit,
-//) {
-//    Scaffold(topBar = {
-//        Column {
-//            CenterAlignedTopAppBar(
-//                colors = TopAppBarDefaults.topAppBarColors(
-//                    containerColor = topBarContainerColor,
-//                    scrolledContainerColor = topBarContainerColor,
-//                ),
-//                title = {
-//                    Text(text = "Cat List")
-//                },
-//            )
-//            Divider()
-//        }
-//
-//    }, content = {
-//        CatList(
-//            paddingValues = it,
-//            items = state.cats,
-//            onItemClick = onItemClick,
-//        )
-//        if (state.loading) {
-//                    Box(
-//                        modifier = Modifier.fillMaxSize(),
-//                        contentAlignment = Alignment.Center,
-//                    ) {
-////                        CircularProgressIndicator()
-//                        Text(text = "Loading...")
-//                    }
-//                }
-//
-//                    else (state.error != null) {
-//                        Box(
-//                            modifier = Modifier.fillMaxSize(),
-//                            contentAlignment = Alignment.Center,
-//                        ) {}
-//                    } else {
-//                        Box(
-//                            modifier = Modifier.fillMaxSize(),
-//                            contentAlignment = Alignment.Center,
-//                        ) {
-//                            Text(text = "No cats.")
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//    })
-//}
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CatListScreen(
     state: CatListState,
-    onItemClick: (CatData) -> Unit,
+    onCatClick: (String) -> Unit,
 ) {
     Scaffold(topBar = {
         Column {
@@ -159,15 +95,15 @@ fun CatListScreen(
             }
         } else {
             CatList(
-                items = state.cats, contentPadding = paddingValues
-            ) {}
+                items = state.cats, contentPadding = paddingValues, onCatClick = onCatClick
+            )
         }
     })
 }
 
 @Composable
 private fun CatList(
-    items: List<CatUiModel>, contentPadding: PaddingValues, onItemClick: (CatUiModel) -> Unit
+    items: List<CatUiModel>, contentPadding: PaddingValues, onCatClick: (String) -> Unit
 ) {
     // LazyColumn should be used for infinite lists which we will
     // learn soon. In the meantime we can use Column with verticalScroll
@@ -186,9 +122,7 @@ private fun CatList(
                 key(it.name) {
                     BreedListItem(
                         data = it,
-                        onClick = {
-                            onItemClick(it)
-                        },
+                        onClick = onCatClick
                     )
                 }
             }
@@ -213,26 +147,31 @@ fun TemperamentChip(
 @Composable
 private fun BreedListItem(
     data: CatUiModel,
-    onClick: () -> Unit,
+    onClick: (String) -> Unit,
 ) {
     Column {
-        ListItem(modifier = Modifier.clickable { onClick() }, headlineContent = {
+        ListItem(modifier = Modifier.clickable { onClick(data.id) }, headlineContent = {
             Text(
                 text = data.name, fontWeight = FontWeight.Bold, fontSize = 22.sp
-//                text = data.getWithAltNames(), fontWeight = FontWeight.Bold, fontSize = 22.sp
                 //modifier = Modifier.size(16.dp)
             )
+            if (!data.alt_names.equals("")) {
+                Text(
+                    text = data.alt_names, fontSize = 17.sp
+                    //modifier = Modifier.size(16.dp)
+                )
+            }
             Spacer(modifier = Modifier.height(8.dp))
         }, supportingContent = {
-//            Text(data.getDesc250())
-            Text(data.description)
+            Text(data.getDesc250())
+//            Text(data.description)
             Spacer(modifier = Modifier.height(8.dp))
-//            Row {
-//                data.getTemperamentArray3(data.temperament).forEach { temperament ->
-//                    TemperamentChip(temperament)
-//                    Spacer(modifier = Modifier.width(8.dp)) // Add spacing between chips
-//                }
-//            }
+            Row {
+                data.getTemperamentArray3(data.temperament).forEach { temperament ->
+                    TemperamentChip(temperament)
+                    Spacer(modifier = Modifier.width(8.dp)) // Add spacing between chips
+                }
+            }
         }, trailingContent = { Icon(Icons.Default.PlayArrow, "More") })
         Divider()
         //HorizontalDivider()
@@ -261,7 +200,34 @@ class CatListStateParameterProvider : PreviewParameterProvider<CatListState> {
         CatListState(
             loading = false,
             cats = listOf(
-                CatUiModel(id = "a", name = "macka1", description = "marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22"),
+                CatUiModel(
+                    id = "a",
+                    name = "macka1",
+                    alt_names = "",
+                    temperament = "temperament1 , 2, 3",
+                    description = "marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22"
+                ),
+                CatUiModel(
+                    id = "a",
+                    name = "macka1",
+                    alt_names = "jaka, ovakva onakva",
+                    temperament = "temperament1 , 2, 3",
+                    description = "marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22"
+                ),
+                CatUiModel(
+                    id = "a",
+                    name = "macka1",
+                    alt_names = "",
+                    temperament = "temperament1 , 2, 3",
+                    description = "dsadsadsadsadsa"
+                ),
+                CatUiModel(
+                    id = "a",
+                    name = "macka1",
+                    alt_names = "",
+                    temperament = "temperament1 , 2, 3",
+                    description = "asd"
+                ),
             ),
         ),
     )
@@ -275,6 +241,6 @@ private fun PreviewCatListScreen(
 ) {
     CatListScreen(
         state = catListState,
-        onItemClick = {}
+        onCatClick = {}
     )
 }

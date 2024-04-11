@@ -8,9 +8,10 @@ data class CatsApiModel(
     val id: String,
     val name: String,
     val description: String,
-//    val temperament: String,
+    val temperament: String,
 //    val address: Address,
-//    @SerialName("alt_names")val alt_names: String,
+    @SerialName("alt_names")
+    val alt_names: String? = null, // Mark altNames as nullable
 )
 
 //@Serializable

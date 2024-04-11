@@ -1,109 +1,84 @@
 package com.example.kolokvijum1.cats.details
 
-import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material.icons.outlined.Share
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.example.kolokvijum1.R
-import com.example.kolokvijum1.cats.model.CatData
+import com.example.kolokvijum1.cats.list.model.CatUiModel
 import com.example.kolokvijum1.cats.repository.CatRepository
-import com.example.kolokvijum1.cats.repository.SampleData
 import com.example.kolokvijum1.core.theme.Kolokvijum1Theme
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import java.util.UUID
 
 private val topBarContainerColor = Color.LightGray
 
-fun NavGraphBuilder.catDetailScreen(
+fun NavGraphBuilder.catDetail(
     route: String,
     arguments: List<NamedNavArgument>,
-    navController: NavController,
+    onClose: () -> Unit
 ) = composable(
     route = route,
     arguments = arguments,
 ) { navBackStackEntry ->
     val dataId = navBackStackEntry.arguments?.getString("dataId")
+        ?: throw IllegalStateException("dataId required")
 
-    val data = if (dataId != null) {
-        CatRepository.getCatById(id = dataId)
-    } else {
-        CatData(
-            id = UUID.randomUUID().toString(),
-            name = "",
-            description = "",
-            altNames = "",
-            temperament = ""
-        )
-    }
-
-    if (data != null) {
-        CatDetailScreen(
-            data = data,
-            onClose = {
-                navController.navigateUp()
+    val catDetailViewModel = viewModel<CatDetailViewModel>(
+        factory = object : ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return CatDetailViewModel(catId = dataId) as T
             }
-        )
-    } else {
-//        NoDataContent(id = dataId.toString())
-    }
+        }
+    )
+
+    val state = catDetailViewModel.state.collectAsState()
+
+    CatDetailScreen(
+        data = state.value,
+        onClose = onClose,
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CatDetailScreen(
-    data: CatData,
+    data: CatDetailState,
     onClose: () -> Unit
 ) {
     Scaffold(topBar = {
@@ -120,7 +95,7 @@ fun CatDetailScreen(
                     )
                 },
                 title = {
-                    Text(text = "Cat Detail")
+                    Text(text = data.catDetail.name)
                 },
             )
             //CenterAlignedTopAppBar(title = { Text(text = "Cat Details") })
@@ -149,10 +124,10 @@ fun CatDetailScreen(
                     .padding(8.dp) // Optional: Add padding around the image
             )
             Divider()
-            CatDetail(name = "Breed", desc = "Syamise")
+            CatDetail(name = "Breed", desc = data.catDetail.name)
             CatDetail(
                 name = "Description",
-                desc = "American Bobtails are loving and incredibly intelligent cats possessing a distinctive wild appearance. They are extremely interactive cats that bond with their human family with great devotion."
+                desc = data.catDetail.description
             )
             CatDetail(name = "Country of Origin", desc = "Egypt")
             CatDetail(name = "Life Expectancy", desc = "14 - 15")
@@ -209,19 +184,20 @@ fun AppIconButton(
 }
 
 
-@Preview(showSystemUi = false)
-@Composable
-fun ComposeAppPreview() {
-    Kolokvijum1Theme {
-        CatDetailScreen(
-            data = CatData(
-                id = "",
-                name = "raf.rs",
-                description = "ailic@raf.rs",
-                altNames = "Lozinka123",
-                temperament = ""
-            ),
-            onClose = {},
-        )
-    }
-}
+//@Preview(showSystemUi = false)
+//@Composable
+//fun ComposeAppPreview() {
+//    Kolokvijum1Theme {
+//        CatDetailScreen(
+////            data = CatData(
+////                id = "",
+////                name = "raf.rs",
+////                description = "ailic@raf.rs",
+////                altNames = "Lozinka123",
+////                temperament = ""
+////            ),
+//            data = ,
+//            onClose = {},
+//        )
+//    }
+//}
