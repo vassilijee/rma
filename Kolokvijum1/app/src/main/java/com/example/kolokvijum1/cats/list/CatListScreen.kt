@@ -34,22 +34,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
-import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
-import com.example.kolokvijum1.cats.list.model.CatUiModel
+import com.example.kolokvijum1.cats.api.model.CatUiModel
 
 private val topBarContainerColor = Color.LightGray
 
 fun NavGraphBuilder.cats(
-    route: String,
-    onCatClick: (String) -> Unit
+    route: String, onCatClick: (String, String) -> Unit
 ) = composable(route = route) {
     val catListViewModel = viewModel<CatListViewModel>()
     val state by catListViewModel.state.collectAsState()
@@ -57,10 +53,6 @@ fun NavGraphBuilder.cats(
     CatListScreen(
         state = state,
         onCatClick = onCatClick,
-
-//        onItemClick = {
-//            navController.navigate(route = "cats/${it.id}")
-//        },
     )
 }
 
@@ -69,7 +61,7 @@ fun NavGraphBuilder.cats(
 @Composable
 fun CatListScreen(
     state: CatListState,
-    onCatClick: (String) -> Unit,
+    onCatClick: (String, String) -> Unit,
 ) {
     Scaffold(topBar = {
         Column {
@@ -103,7 +95,7 @@ fun CatListScreen(
 
 @Composable
 private fun CatList(
-    items: List<CatUiModel>, contentPadding: PaddingValues, onCatClick: (String) -> Unit
+    items: List<CatUiModel>, contentPadding: PaddingValues, onCatClick: (String, String) -> Unit
 ) {
     // LazyColumn should be used for infinite lists which we will
     // learn soon. In the meantime we can use Column with verticalScroll
@@ -118,39 +110,25 @@ private fun CatList(
         verticalArrangement = Arrangement.Top,
     ) {
         items.forEach {
+            //it.image?.let { it1 -> Log.e("img", it1.url) }
             Column {
                 key(it.name) {
                     BreedListItem(
-                        data = it,
-                        onClick = onCatClick
+                        data = it, onClick = onCatClick
                     )
                 }
             }
         }
-
     }
-}
-
-
-@Composable
-fun TemperamentChip(
-    data: String
-) {
-    SuggestionChip(onClick = { }, label = {
-        Text(
-            text = data, fontSize = 15.sp
-        )
-    }, modifier = Modifier.size(Dp.Unspecified, 20.dp)
-    )
 }
 
 @Composable
 private fun BreedListItem(
     data: CatUiModel,
-    onClick: (String) -> Unit,
+    onClick: (String, String) -> Unit, // Add image URL parameter
 ) {
     Column {
-        ListItem(modifier = Modifier.clickable { onClick(data.id) }, headlineContent = {
+        ListItem(modifier = Modifier.clickable { onClick(data.id, data.image?.url ?: "") }, headlineContent = {
             Text(
                 text = data.name, fontWeight = FontWeight.Bold, fontSize = 22.sp
                 //modifier = Modifier.size(16.dp)
@@ -164,7 +142,6 @@ private fun BreedListItem(
             Spacer(modifier = Modifier.height(8.dp))
         }, supportingContent = {
             Text(data.getDesc250())
-//            Text(data.description)
             Spacer(modifier = Modifier.height(8.dp))
             Row {
                 data.getTemperamentArray3(data.temperament).forEach { temperament ->
@@ -178,6 +155,18 @@ private fun BreedListItem(
     }
 }
 
+@Composable
+fun TemperamentChip(
+    data: String
+) {
+    SuggestionChip(onClick = { }, label = {
+        Text(
+            text = data, fontSize = 15.sp
+        )
+    }, modifier = Modifier.size(Dp.Unspecified, 20.dp)
+    )
+}
+
 
 //@Preview
 //@Composable
@@ -189,58 +178,58 @@ private fun BreedListItem(
 //        )
 //    }
 //}
-class CatListStateParameterProvider : PreviewParameterProvider<CatListState> {
-    override val values: Sequence<CatListState> = sequenceOf(
+//class CatListStateParameterProvider : PreviewParameterProvider<CatListState> {
+//    override val values: Sequence<CatListState> = sequenceOf(
 //        CatListState(
 //            loading = true,
 //        ),
 //        CatListState(
 //            loading = false,
 //        ),
-        CatListState(
-            loading = false,
-            cats = listOf(
-                CatUiModel(
-                    id = "a",
-                    name = "macka1",
-                    alt_names = "",
-                    temperament = "temperament1 , 2, 3",
-                    description = "marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22"
-                ),
-                CatUiModel(
-                    id = "a",
-                    name = "macka1",
-                    alt_names = "jaka, ovakva onakva",
-                    temperament = "temperament1 , 2, 3",
-                    description = "marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22"
-                ),
-                CatUiModel(
-                    id = "a",
-                    name = "macka1",
-                    alt_names = "",
-                    temperament = "temperament1 , 2, 3",
-                    description = "dsadsadsadsadsa"
-                ),
-                CatUiModel(
-                    id = "a",
-                    name = "macka1",
-                    alt_names = "",
-                    temperament = "temperament1 , 2, 3",
-                    description = "asd"
-                ),
-            ),
-        ),
-    )
-}
+//        CatListState(
+//            loading = false,
+//            cats = listOf(
+//                CatUiModel(
+//                    id = "a",
+//                    name = "macka1",
+//                    alt_names = "",
+//                    temperament = "temperament1 , 2, 3",
+//                    description = "marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22"
+//                ),
+//                CatUiModel(
+//                    id = "a",
+//                    name = "macka1",
+//                    alt_names = "jaka, ovakva onakva",
+//                    temperament = "temperament1 , 2, 3",
+//                    description = "marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22marko22"
+//                ),
+//                CatUiModel(
+//                    id = "a",
+//                    name = "macka1",
+//                    alt_names = "",
+//                    temperament = "temperament1 , 2, 3",
+//                    description = "dsadsadsadsadsa"
+//                ),
+//                CatUiModel(
+//                    id = "a",
+//                    name = "macka1",
+//                    alt_names = "",
+//                    temperament = "temperament1 , 2, 3",
+//                    description = "asd"
+//                ),
+//),
+//),
+//)
+//}
 
 
-@Preview
-@Composable
-private fun PreviewCatListScreen(
-    @PreviewParameter(CatListStateParameterProvider::class) catListState: CatListState,
-) {
-    CatListScreen(
-        state = catListState,
-        onCatClick = {}
-    )
-}
+//@Preview
+//@Composable
+//private fun PreviewCatListScreen(
+//    @PreviewParameter(CatListStateParameterProvider::class) catListState: CatListState,
+//) {
+////    CatListScreen(
+////        state = catListState,
+////        onCatClick = {}
+////    )
+//}

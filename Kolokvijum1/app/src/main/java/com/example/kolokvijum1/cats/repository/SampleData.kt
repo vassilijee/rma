@@ -1,10 +1,10 @@
 package com.example.kolokvijum1.cats.repository
 
-import android.util.Log
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
-import java.io.IOException
+//import android.util.Log
+//import kotlinx.coroutines.Dispatchers
+//import kotlinx.coroutines.runBlocking
+//import kotlinx.coroutines.withContext
+//import java.io.IOException
 
 
 //suspend fun getCatDataList(): List<CatData>? {

@@ -2,16 +2,9 @@ package com.example.kolokvijum1.cats.repository
 
 import com.example.kolokvijum1.cats.api.CatsApi
 import com.example.kolokvijum1.cats.api.model.CatsApiModel
-import com.example.kolokvijum1.cats.list.model.CatUiModel
+import com.example.kolokvijum1.cats.api.model.CatUiModel
 import com.example.kolokvijum1.networking.retrofit
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.update
-import kotlin.time.Duration.Companion.seconds
 
 object CatRepository {
     private val catsApi: CatsApi = retrofit.create(CatsApi::class.java)
@@ -28,12 +21,15 @@ object CatRepository {
     }
 
     suspend fun fetchCatsDetails(catId: String): CatsApiModel {
-        val catsApi = catsApi.getCat(catId);
+//        val catsApi = catsApi.getCat(catId)
+//        val catsPic = catsApi.getPic(catId)
+        val catsApi = catsApi.getCat(catId)
+
         return catsApi
     }
 
 
-    fun observeCats(): Flow<List<CatUiModel>> = cats.asStateFlow()
+//    fun observeCats(): Flow<List<CatUiModel>> = cats.asStateFlow()
 
 
 //    fun observeCatsDetails(catId: String): Flow<CatData?> {
@@ -47,9 +43,15 @@ object CatRepository {
 
     private fun CatsApiModel.asCatUiModel() = CatUiModel(
         id = this.id,
+        name = this.name,
         description = this.description,
         alt_names = this.alt_names ?: "", // Providing a default value for nullable properties
-        name = this.name,
-        temperament = this.temperament
+        temperament = this.temperament,
+        countryofOrigin = this.countryofOrigin,
+        lifeExpectancy = this.lifeExpectancy,
+        rare = this.rare,
+        wiki = this.wikipedia_url ?: "",
+        avgWeight = this.weight,
+        image = this.image
     )
 }

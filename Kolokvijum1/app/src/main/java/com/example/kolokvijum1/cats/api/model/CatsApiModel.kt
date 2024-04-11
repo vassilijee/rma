@@ -9,17 +9,29 @@ data class CatsApiModel(
     val name: String,
     val description: String,
     val temperament: String,
-//    val address: Address,
     @SerialName("alt_names")
     val alt_names: String? = null, // Mark altNames as nullable
+    @SerialName("origin")
+    val countryofOrigin: String,
+    @SerialName("life_span")
+    val lifeExpectancy: String,
+    val weight: Weight,
+    val rare: Int,
+    val wikipedia_url: String? = null, // Make the field nullable
+    @SerialName("image")
+    val image: Image? = null // Mark image as nullable
 )
 
-//@Serializable
-//data class Address(
-//    val street: String,
-//    val city: String,
-//    val zipcode: String,
-//)
+@Serializable
+data class Weight(
+    val imperial: String,
+    val metric: String,
+)
+
+@Serializable
+data class Image(
+    val url: String,
+)
 
 // Json:
 //{

@@ -4,7 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.kolokvijum1.cats.api.model.CatsApiModel
-import com.example.kolokvijum1.cats.list.model.CatUiModel
+import com.example.kolokvijum1.cats.api.model.CatUiModel
 import com.example.kolokvijum1.cats.repository.CatRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -59,11 +59,18 @@ class CatListViewModel(private val repository: CatRepository = CatRepository) : 
             }
         }
     }
-    private fun CatsApiModel.asCatUiModel() = CatUiModel (
+
+    private fun CatsApiModel.asCatUiModel() = CatUiModel(
         id = this.id,
         name = this.name,
         description = this.description,
         alt_names = this.alt_names ?: "", // Providing a default value for nullable properties
-        temperament = this.temperament
+        temperament = this.temperament,
+        countryofOrigin = this.countryofOrigin,
+        lifeExpectancy = this.lifeExpectancy,
+        rare = this.rare,
+        wiki = this.wikipedia_url ?: "",
+        avgWeight = this.weight,
+        image = this.image
     )
 }

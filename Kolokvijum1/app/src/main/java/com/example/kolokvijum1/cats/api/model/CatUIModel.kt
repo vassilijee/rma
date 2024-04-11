@@ -1,11 +1,17 @@
-package com.example.kolokvijum1.cats.list.model
+package com.example.kolokvijum1.cats.api.model
 
 data class CatUiModel(
     val id: String,
     val name: String,
     val description: String,
     val temperament: String,
-    val alt_names: String
+    val alt_names: String,
+    val countryofOrigin: String,
+    val lifeExpectancy: String,
+    val avgWeight: Weight,
+    val rare: Int,
+    val wiki: String,
+    val image: Image?
 ) {
     private fun getTemperamentArray(temperamentString: String): List<String> {
         // Split the string by comma

@@ -1,6 +1,6 @@
 package com.example.kolokvijum1.navigation
 
-import androidx.compose.material3.ExperimentalMaterial3Api
+import android.net.Uri
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -10,7 +10,6 @@ import com.example.kolokvijum1.cats.details.catDetail
 import com.example.kolokvijum1.cats.list.cats
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
@@ -19,16 +18,20 @@ fun AppNavigation() {
         navController = navController,
         startDestination = "cats",
     ) {
-
-        cats(route = "cats", onCatClick = {
-            navController.navigate(route = "cats/$it")
+        cats(route = "cats", onCatClick = { id, imageUrl ->
+            val encodedUrl = Uri.encode(imageUrl) // Encode the URL
+            navController.navigate("cats/$id/$encodedUrl") // Navigate to cat detail screen with ID and URL
         })
-
-        catDetail(route = "cats/{dataId}", arguments = listOf(navArgument(name = "dataId") {
-            this.type = NavType.StringType
-            this.nullable = true
-        }), onClose = {
-            navController.navigateUp()
-        })
+        catDetail(route = "cats/{dataId}/{dataUrl}",
+            arguments = listOf(navArgument(name = "dataId") {
+                this.type = NavType.StringType
+                this.nullable = true
+            }, navArgument("dataUrl") {
+                this.type = NavType.StringType
+                this.nullable = true
+            }),
+            onClose = {
+                navController.navigateUp()
+            })
     }
 }
